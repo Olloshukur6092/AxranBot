@@ -1,6 +1,7 @@
 const { Telegraf } = require("telegraf");
 const { message } = require("telegraf/filters");
-const bot = new Telegraf("7958794297:AAGz9KqaW4wb8fZlhuzM5RN2Kp8_6UmCNZo"); // Bot tokenni BotFather'dan oling
+require("dotenv").config();
+const bot = new Telegraf(process.env.BOT_TOKEN); // Bot tokenni BotFather'dan oling
 
 // Guruhga yangi a'zo qo'shilganda xabar berish
 bot.on(message("new_chat_members"), (ctx) => {
