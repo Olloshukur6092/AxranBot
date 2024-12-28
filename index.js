@@ -1,6 +1,7 @@
-const { Bot } = require("grammy");
-const { reverseMessage } = require("./functions/messageFunction");
-require("dotenv").config();
+import { Bot } from "grammy";
+import { reverseMessage } from "./functions/messageFunction.js";
+import { configDotenv } from "dotenv";
+configDotenv();
 
 const bot = new Bot(process.env.BOT_TOKEN);
 
