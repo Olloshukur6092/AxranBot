@@ -1,4 +1,5 @@
 const { Bot } = require("grammy");
+const { reverseMessage } = require("./functions/messageFunction");
 require("dotenv").config();
 
 const bot = new Bot(process.env.BOT_TOKEN);
@@ -15,14 +16,5 @@ bot.on(":text", (ctx) => {
     reply_parameters: { message_id: ctx.msg.message_id },
   });
 });
-
-function reverseMessage(messageUsers) {
-  let message = "";
-  for (let i = messageUsers.length - 1; i >= 0; i--) {
-    message += messageUsers[i];
-  }
-
-  return message;
-}
 
 bot.start();
