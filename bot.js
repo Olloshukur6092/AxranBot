@@ -25,12 +25,13 @@ bot.on(message("text"), (ctx) => {
   if (
     salommassiv.some((word) => ctx.message.text.toLowerCase().includes(word))
   ) {
-    ctx.reply(`Assalomu alaykum! qalesiz! ${ctx.message.from.first_name}`, {reply_to_message_id: ctx.message.message_id});
-    // ctx.reply(
-    //   `Salom, ${userName}! Siz yozdingiz: "${userMessage}"`,
-    //   { reply_to_message_id: ctx.message.message_id } // Reply qilish uchun kerak
-    // );
+    ctx.reply(`Assalomu alaykum! qalesiz! ${ctx.message.from.first_name}`, {
+      reply_to_message_id: ctx.message.message_id,
+    });
   }
+
+  // xabarga xabar echo
+  ctx.reply(ctx.message.text, { reply_to_message_id: ctx.message.message_id });
 });
 
 // Botni ishga tushirish
