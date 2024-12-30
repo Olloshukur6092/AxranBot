@@ -6,13 +6,6 @@ class MessageService {
     this.violationCounts = {};
   }
 
-  // return true or false
-  // checkMessage(message) {
-  //   if (!message) return false;
-  //   const regex = new RegExp(this.greeting_arrays.join("|"), "i");
-  //   return regex.test(message);
-  // }
-
   #isAdminOrOwner(status) {
     if (!status) return false;
     return status === MemberStatus.ADMIN || status === MemberStatus.CREATOR;
