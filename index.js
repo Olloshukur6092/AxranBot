@@ -14,6 +14,9 @@ bot.on(":new_chat_members", (ctx) => {
   });
 });
 
+// guruhda foydalanuvchi kerakmas contentlarni necha marta tashaganini saqlaydi;
+const violationCounts = {};
+
 bot.on("message", async (ctx) => {
   if (
     ctx.chat.type === ChatType.GROUP ||
@@ -28,9 +31,19 @@ bot.on("message", async (ctx) => {
     if (!isAdminOrOwner && messageService.isUnwantedContent(message)) {
       try {
         await ctx.deleteMessage();
+        const userId = ctx.from.id;
+        violationCounts[userId] = (violationCounts[userId] || 0) + 1;
         await ctx.reply(
-          `${ctx.from.first_name}, bu kontentga ruxsat berilmagan!`
+          `${ctx.from.first_name}, bu kontentga ruxsat berilmagan! (Buzilish soni: ${violationCounts[userId]})`
         );
+
+        if (violationCounts[userId] > 3) {
+          await ctx.banChatMember(userId); // Guruhdan chiqarish
+          await ctx.reply(
+            `${ctx.from.first_name}, siz 3 martadan ko'p qoidalarni buzganingiz uchun guruhdan chiqarildingiz.`
+          );
+          delete violationCounts[userId]; // Hisobni tozalash
+        }
       } catch (err) {
         console.error("Xabarni o'chirishda xatolik:", err);
       }
