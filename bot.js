@@ -27,59 +27,57 @@ bot.command(
   }
 );
 
-bot.on(":new_chat_members", (ctx) => {
-  ctx.message.new_chat_members.forEach((newMember) => {
+bot.on(":new_chat_members", async (ctx) => {
+  ctx.message.new_chat_members.forEach(async (newMember) => {
     const num1 = Math.floor(Math.random() * 10);
     const num2 = Math.floor(Math.random() * 10);
     const captchaQuestion = `${num1} + ${num2} necha?`;
 
-    // Yangi foydalanuvchining ID sini olish
-    const userId = newMember.id;
-
-    ctx.reply(
+    // Yangi foydalanuvchiga captcha yuborish
+    await ctx.reply(
       `Assalomu alaykum, ${newMember.first_name}! \n${captchaQuestion}`
     );
 
-    // Javobni yangi foydalanuvchining ID si bilan saqlash
-    redis.set(userId.toString(), num1 + num2);
+    // To'g'ri javobni saqlash
+    await redis.set(newMember.id.toString(), num1 + num2);
+    await redis.set(`wrongAnswerCount:${newMember.id}`, 0);
   });
 });
 
 bot.on(":text", async (ctx) => {
-  const userAnswer = parseInt(ctx.message.text);
+  const userId = ctx.from.id.toString();
+  const correctAnswer = await redis.get(userId);
 
-  const correctAnswer = await redis.get(ctx.from.id.toString()); // Javobni olish
-  let wrongAnswerCount = (await redis.get("wrongAnswerCount")) || 0;
-
+  // Faqat yangi qo'shilgan foydalanuvchilar uchun tekshirish
   if (correctAnswer !== null) {
+    const userAnswer = parseInt(ctx.message.text);
+    let wrongAnswerCount =
+      parseInt(await redis.get(`wrongAnswerCount:${userId}`)) || 0;
+
     if (userAnswer === parseInt(correctAnswer)) {
       await ctx.reply("Tabriklaymiz! Siz captcha ni to'g'ri topdingiz!");
-      await redis.del(ctx.from.id.toString()); // Javobni o'chirish
-      await redis.del("wrongAnswerCount");
+      await redis.del(userId);
+      await redis.del(`wrongAnswerCount:${userId}`);
     } else {
       wrongAnswerCount++;
-      redis.set("wrongAnswerCount", wrongAnswerCount);
+      await redis.set(`wrongAnswerCount:${userId}`, wrongAnswerCount);
 
       await ctx.reply(
-        `Xato! Iltimos, captcha ga to'g'ri javob bering. Urinishlar soni ${wrongAnswerCount}`
+        `Xato! Iltimos, captcha ga to'g'ri javob bering. Urinishlar soni: ${wrongAnswerCount}`
       );
 
       if (wrongAnswerCount >= 3) {
-        await ctx.banChatMember(ctx.from.id);
+        await ctx.banChatMember(userId);
         await ctx.reply(
-          `<b>${ctx.from.first_name}</b> siz <b>${wrongAnswerCount} marta</b> urinish qilib captchaga javob berolmadingiz va guruhdan chiqarildingiz`,
-          {
-            parse_mode: "HTML",
-          }
+          `<b>${ctx.from.first_name}</b>, siz <b>${wrongAnswerCount} marta</b> urinish qilib, captcha ga javob berolmadingiz va guruhdan chiqarildingiz.`,
+          { parse_mode: "HTML" }
         );
-        await redis.del(ctx.from.id.toString());
-        await redis.del("wrongAnswerCount");
+        await redis.del(userId);
+        await redis.del(`wrongAnswerCount:${userId}`);
       }
     }
   } else {
-    ctx.reply("<b>Sizga captcha berilmagan.</b>", {
-      parse_mode: "HTML",
-    });
+    return;
   }
 });
 
@@ -108,7 +106,3 @@ bot.on("message:document", async (ctx) => {
 });
 
 export default bot;
-
-
-
-
