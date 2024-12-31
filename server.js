@@ -1,29 +1,21 @@
 import e from "express";
 import bot from "./bot.js";
 import { webhookCallback } from "grammy";
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = e();
 app.use(e.json());
 
-// Webhook URL ni loglash
-const webhookURL = `${process.env.WEBHOOK_URI}/webhook`;
-console.log("Webhook URL:", webhookURL);
-
 bot.api
-  .setWebhook(webhookURL)
+  .setWebhook(`${process.env.WEBHOOK_URI}/webhook`)
   .then(() => {
-    console.log("Webhook muvaffaqiyatli o‘rnatildi...");
+    console.log("Webhook muvaffaqiyatli o'rnatildi...");
   })
   .catch((err) => {
-    console.error("Webhookni o‘rnatishda xatolik:", err);
+    console.error("Webhookni o'rnatishda xatolik:", err);
   });
 
-// Grammy webhookni Express serveriga ulash
-app.post("/webhook", (req, res) => {
-  console.log("Telegramdan kelgan so‘rov:", req.body);
-  webhookCallback(bot, "express")(req, res).catch((err) => {
-    console.error("Webhook so‘rovini qayta ishlashda xatolik:", err);
-  });
-});
+app.post("/webhook", webhookCallback(bot, "express"));
 
 export default app;
