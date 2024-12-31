@@ -6,7 +6,12 @@ import { limit } from "@grammyjs/ratelimiter";
 import Redis from "ioredis";
 dotenv.config();
 const bot = new Bot(process.env.BOT_TOKEN);
-const redis = new Redis();
+
+if (process.env.NODE_ENV === "production") {
+  var redis = new Redis(process.env.REDIS_URL);
+} else {
+  var redis = new Redis();
+}
 
 const messageService = new MessageService();
 
