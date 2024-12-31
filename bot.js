@@ -2,12 +2,29 @@ import { Bot } from "grammy";
 import { ContentType } from "./enums/ContentType.js";
 import MessageService from "./services/MessageService.js";
 import dotenv from "dotenv";
+import { limit } from "@grammyjs/ratelimiter";
 dotenv.config();
 const bot = new Bot(process.env.BOT_TOKEN);
 
 const messageService = new MessageService();
 
-bot.command("start", (ctx) => ctx.reply("Assalomu alaykum!"));
+bot.command(
+  "start",
+  limit({
+    timeFrame: 60000, // 2 soniya
+    limit: 3, // 3 ta so'rov
+    onLimitExceeded: async (ctx) => {
+      await ctx.reply("Iltimos, juda ko'p so'rov yuborishdan saqlaning!");
+    },
+    keyGenerator: (ctx) => ctx.from?.id.toString(),
+  }),
+  async (ctx) => {
+    await ctx.reply(
+      `Assalomu alaykum, ${ctx.from.first_name}! Botga xush kelibsiz.`
+    );
+  }
+);
+
 bot.on(":new_chat_members", (ctx) => {
   ctx.reply(`Assalomu alaykum, ${ctx.from.first_name}`, {
     reply_parameters: { message_id: ctx.msg.message_id },
