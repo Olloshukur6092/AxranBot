@@ -1,11 +1,11 @@
-import e from "express";
+import express from "express";
 import bot from "./bot.js";
 import { webhookCallback } from "grammy";
 import dotenv from "dotenv";
 dotenv.config();
 
-const app = e();
-app.use(e.json());
+const app = express();
+app.use(express.json());
 
 bot.api
   .setWebhook(`${process.env.WEBHOOK_URI}/webhook`)
